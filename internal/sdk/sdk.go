@@ -10,6 +10,13 @@ import (
 	"github.com/docker/docker/client"
 )
 
+type DB interface {
+	GetImage() string
+	EnvVars() []string
+	Dsn(user, password, host, port, db string) string
+	Display()
+}
+
 func cli() (*client.Client, error) {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -27,9 +34,11 @@ func pull(ctx context.Context, cli *client.Client, image string) (io.ReadCloser,
 	return reader, nil
 }
 
-func create(ctx context.Context, cli *client.Client, image string) (container.CreateResponse, error) {
+func create(ctx context.Context, cli *client.Client, image string, env []string) (container.CreateResponse, error) {
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: image,
+		Env:   env,
+		Tty:   true,
 	}, nil, nil, nil, "")
 	if err != nil {
 		return container.CreateResponse{}, err
@@ -44,15 +53,17 @@ func start(ctx context.Context, cli *client.Client, resp container.CreateRespons
 	return nil
 }
 
-func Setup(image string) {
+func Setup(db DB) {
 	ctx := context.Background()
+	fmt.Println("Starting client...")
 	cli, err := cli()
 	if err != nil {
 		panic(err)
 	}
 	defer cli.Close()
 
-	reader, err := pull(ctx, cli, image)
+	fmt.Println("Pulling image...")
+	reader, err := pull(ctx, cli, db.GetImage())
 	if err != nil {
 		panic(err)
 	}
@@ -60,12 +71,17 @@ func Setup(image string) {
 
 	io.Copy(io.Discard, reader)
 
-	resp, err := create(ctx, cli, image)
+	fmt.Println("Creating container...")
+	resp, err := create(ctx, cli, db.GetImage(), db.EnvVars())
 	if err != nil {
 		panic(err)
 	}
 
+	fmt.Println("Starting container...")
 	if err := start(ctx, cli, resp); err != nil {
 		panic(err)
 	}
+
+	fmt.Println("Done.")
+	db.Display()
 }
