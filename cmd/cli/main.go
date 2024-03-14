@@ -18,6 +18,8 @@ func main() {
 	case "list":
 		sdk.List()
 		return
+	case "remove":
+		// sdk.Remove()
 	default:
 		fmt.Println("Error: Expected command 'create'")
 		return
