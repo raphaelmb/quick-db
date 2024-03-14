@@ -15,6 +15,9 @@ func main() {
 	switch arg1 {
 	case "create":
 		fmt.Println("Creating a database via Docker")
+	case "list":
+		sdk.List()
+		return
 	default:
 		fmt.Println("Error: Expected command 'create'")
 		return
@@ -23,15 +26,15 @@ func main() {
 	switch arg2 {
 	case "postgres":
 		fmt.Println("PostgreSQL chosen")
-		pg := database.NewPostgreSQL("postgres", "", "", "", "")
+		pg := database.NewPostgreSQL("postgres", "", "", "", "", "", false)
 		sdk.Setup(pg)
 	case "mysql":
 		fmt.Println("MySQL chosen")
-		mysql := database.NewMySQL("mysql", "", "", "", "", "")
+		mysql := database.NewMySQL("mysql", "", "", "", "", "", "", false)
 		sdk.Setup(mysql)
 	case "mongo":
 		fmt.Println("MongoDB chosen")
-		mongo := database.NewMongoDB("mongo", "", "", "", "")
+		mongo := database.NewMongoDB("mongo", "", "", "", "", "", false)
 		sdk.Setup(mongo)
 	default:
 		fmt.Println("Error: expected database 'postgres', 'mysql' or 'mongo'")

@@ -7,26 +7,52 @@ type PostgreSQL struct {
 	POSTGRES_USER     string
 	POSTGRES_PASSWORD string
 	POSTGRES_DB       string
-	Port              string
+	DataPath          string
+	ContainerPort     string
 	DSN               string
+	Opts              Options
 }
 
-func NewPostgreSQL(image, user, password, db, port string) *PostgreSQL {
+func NewPostgreSQL(image, user, password, db, port, name string, volume bool) *PostgreSQL {
 	pg := &PostgreSQL{
 		Image:             defaultIfEmpty(image, "postgres"),
 		POSTGRES_USER:     defaultIfEmpty(user, "postgres"),
 		POSTGRES_PASSWORD: defaultIfEmpty(password, "password"),
 		POSTGRES_DB:       defaultIfEmpty(db, "postgres"),
-		Port:              defaultIfEmpty(port, "5432"),
+		DataPath:          "/var/lib/postgresql/data",
 	}
 
-	pg.DSN = pg.Dsn(pg.POSTGRES_USER, pg.POSTGRES_PASSWORD, "localhost", pg.Port, pg.POSTGRES_DB)
+	pg.Opts.HostPort = defaultIfEmpty("5432", port)
+	pg.Opts.Name = defaultIfEmpty(name, "")
+	pg.Opts.CreateVolume = volume
+	pg.ContainerPort = "5432"
+	pg.DSN = pg.Dsn(pg.POSTGRES_USER, pg.POSTGRES_PASSWORD, "localhost", pg.Opts.HostPort, pg.POSTGRES_DB)
 
 	return pg
 }
 
 func (p *PostgreSQL) GetImage() string {
 	return p.Image
+}
+
+func (p *PostgreSQL) GetContainerPort() string {
+	return p.ContainerPort
+}
+
+func (p *PostgreSQL) GetHostPort() string {
+	return p.Opts.HostPort
+}
+
+func (p *PostgreSQL) GetContainerName() string {
+	return p.Opts.Name
+}
+
+func (p *PostgreSQL) GetDataPath() string {
+	return p.DataPath
+}
+
+func (p *PostgreSQL) GetCreateVolume() bool {
+	return p.Opts.CreateVolume
 }
 
 func (p *PostgreSQL) EnvVars() []string {
@@ -41,6 +67,6 @@ func (p *PostgreSQL) Display() {
 	fmt.Println("User: ", p.POSTGRES_USER)
 	fmt.Println("Password: ", p.POSTGRES_PASSWORD)
 	fmt.Println("Database: ", p.POSTGRES_DB)
-	fmt.Println("Port: ", p.Port)
+	fmt.Println("Port: ", p.Opts.HostPort)
 	fmt.Println("DSN: ", p.DSN)
 }
