@@ -11,19 +11,8 @@ import (
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/raphaelmb/quick-db/internal/database"
 )
-
-type DB interface {
-	GetImage() string
-	GetContainerPort() string
-	GetContainerName() string
-	GetDataPath() string
-	GetCreateVolume() bool
-	GetHostPort() string
-	EnvVars() []string
-	Dsn(user, password, host, port, db string) string
-	Display()
-}
 
 func cli() (*client.Client, error) {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -91,19 +80,19 @@ func start(ctx context.Context, cli *client.Client, resp container.CreateRespons
 	return nil
 }
 
-func Setup(db DB) {
+func Setup(db database.DB) error {
 	ctx := context.Background()
 	fmt.Println("Starting client...")
 	cli, err := cli()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer cli.Close()
 
 	fmt.Println("Pulling image...")
 	reader, err := pull(ctx, cli, db.GetImage())
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer reader.Close()
 
@@ -112,14 +101,16 @@ func Setup(db DB) {
 	fmt.Println("Creating container...")
 	resp, err := create(ctx, cli, db.GetImage(), db.EnvVars(), db.GetContainerPort(), db.GetHostPort(), db.GetContainerName(), db.GetCreateVolume(), db.GetDataPath())
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Println("Starting container...")
 	if err := start(ctx, cli, resp); err != nil {
-		panic(err)
+		return err
 	}
 
 	fmt.Println("Done.")
 	db.Display()
+
+	return nil
 }

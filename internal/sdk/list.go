@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 )
 
-func List() {
+func List() ([]Container, error) {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -25,13 +26,30 @@ func List() {
 		Filters: filter,
 	})
 	if err != nil {
-		panic(err)
+		return []Container{}, fmt.Errorf("error listing containers: %w", err)
 	}
 
+	var result []Container
 	for _, container := range containers {
-		fmt.Println("ID:", container.ID[:12])
-		fmt.Println("Name:", container.Names[0])
-		fmt.Println("Image:", container.Image)
-		fmt.Println("Port:", container.Ports[0].PublicPort)
+		result = append(result, toContainer(container))
+	}
+
+	fmt.Println(result)
+	return result, nil
+}
+
+type Container struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Image string `json:"image"`
+	Port  uint16 `json:"port"`
+}
+
+func toContainer(container types.Container) Container {
+	return Container{
+		ID:    container.ID,
+		Name:  container.Names[0],
+		Image: container.Image,
+		Port:  container.Ports[0].PublicPort,
 	}
 }

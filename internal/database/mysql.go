@@ -14,10 +14,10 @@ type MySQL struct {
 	Opts                Options
 }
 
-func NewMySQL(image, rootPassword, password, user, database, port, name string, volume bool) *MySQL {
+func NewMySQL(image, password, user, database, port, name string, volume bool) *MySQL {
 	mySQL := &MySQL{
 		Image:               defaultIfEmpty(image, "mysql"),
-		MYSQL_ROOT_PASSWORD: defaultIfEmpty(rootPassword, "root"),
+		MYSQL_ROOT_PASSWORD: "root",
 		MYSQL_PASSWORD:      defaultIfEmpty(password, "password"),
 		MYSQL_USER:          defaultIfEmpty(user, "mysql"),
 		MYSQL_DATABASE:      defaultIfEmpty(database, "mysql"),

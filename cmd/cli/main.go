@@ -21,7 +21,7 @@ func main() {
 	case "remove":
 		// sdk.Remove()
 	default:
-		fmt.Println("Error: Expected command 'create'")
+		fmt.Println("Error: Expected command 'create', 'list' or 'remove'")
 		return
 	}
 
@@ -32,7 +32,7 @@ func main() {
 		sdk.Setup(pg)
 	case "mysql":
 		fmt.Println("MySQL chosen")
-		mysql := database.NewMySQL("mysql", "", "", "", "", "", "", false)
+		mysql := database.NewMySQL("mysql", "", "", "", "", "", false)
 		sdk.Setup(mysql)
 	case "mongo":
 		fmt.Println("MongoDB chosen")
