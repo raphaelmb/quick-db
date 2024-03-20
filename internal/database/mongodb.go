@@ -9,7 +9,6 @@ type MongoDB struct {
 	MONGO_INITDB_DATABASE      string
 	DataPath                   string
 	ContainerPort              string
-	DSN                        string
 	Opts                       Options
 }
 
@@ -26,9 +25,20 @@ func NewMongoDB(image, rootUsername, rootPassword, database, port, name string, 
 	mongo.Opts.Name = defaultIfEmpty(name, "")
 	mongo.Opts.CreateVolume = volume
 	mongo.ContainerPort = "27017"
-	mongo.DSN = mongo.Dsn(mongo.MONGO_INITDB_ROOT_USERNAME, mongo.MONGO_INITDB_ROOT_PASSWORD, "localhost", mongo.Opts.HostPort, mongo.MONGO_INITDB_DATABASE)
 
 	return mongo
+}
+
+func (m *MongoDB) GetUser() string {
+	return m.MONGO_INITDB_ROOT_USERNAME
+}
+
+func (m *MongoDB) GetPassword() string {
+	return m.MONGO_INITDB_ROOT_PASSWORD
+}
+
+func (m *MongoDB) GetDB() string {
+	return m.MONGO_INITDB_DATABASE
 }
 
 func (m *MongoDB) GetImage() string {
@@ -59,14 +69,6 @@ func (m *MongoDB) EnvVars() []string {
 	return []string{"MONGO_INITDB_ROOT_USERNAME=" + m.MONGO_INITDB_ROOT_USERNAME, "MONGO_INITDB_ROOT_PASSWORD=" + m.MONGO_INITDB_ROOT_PASSWORD, "MONGO_INITDB_DATABASE=" + m.MONGO_INITDB_DATABASE}
 }
 
-func (m *MongoDB) Dsn(user, password, host, port, db string) string {
-	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", user, password, host, port, db)
-}
-
-func (m *MongoDB) Display() {
-	fmt.Println("User: ", m.MONGO_INITDB_ROOT_USERNAME)
-	fmt.Println("Password: ", m.MONGO_INITDB_ROOT_PASSWORD)
-	fmt.Println("Database: ", m.MONGO_INITDB_DATABASE)
-	fmt.Println("Port: ", m.Opts.HostPort)
-	fmt.Println("DSN: ", m.DSN)
+func (m *MongoDB) Dsn() string {
+	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", m.MONGO_INITDB_ROOT_USERNAME, m.MONGO_INITDB_ROOT_PASSWORD, m.GetHostPort(), m.ContainerPort, m.MONGO_INITDB_DATABASE)
 }

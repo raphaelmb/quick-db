@@ -10,7 +10,6 @@ type MySQL struct {
 	MYSQL_DATABASE      string
 	DataPath            string
 	ContainerPort       string
-	DSN                 string
 	Opts                Options
 }
 
@@ -28,9 +27,20 @@ func NewMySQL(image, password, user, database, port, name string, volume bool) *
 	mySQL.Opts.Name = defaultIfEmpty(name, "")
 	mySQL.Opts.CreateVolume = volume
 	mySQL.ContainerPort = "3306"
-	mySQL.DSN = mySQL.Dsn(mySQL.MYSQL_USER, mySQL.MYSQL_PASSWORD, "localhost", mySQL.Opts.HostPort, mySQL.MYSQL_DATABASE)
 
 	return mySQL
+}
+
+func (m *MySQL) GetUser() string {
+	return m.MYSQL_USER
+}
+
+func (m *MySQL) GetPassword() string {
+	return m.MYSQL_PASSWORD
+}
+
+func (m *MySQL) GetDB() string {
+	return m.MYSQL_DATABASE
 }
 
 func (m *MySQL) GetImage() string {
@@ -61,15 +71,6 @@ func (m *MySQL) EnvVars() []string {
 	return []string{"MYSQL_USER=" + m.MYSQL_USER, "MYSQL_PASSWORD=" + m.MYSQL_PASSWORD, "MYSQL_DATABASE=" + m.MYSQL_DATABASE, "MYSQL_ROOT_PASSWORD=" + m.MYSQL_ROOT_PASSWORD}
 }
 
-func (m *MySQL) Dsn(user, password, host, port, db string) string {
-	return fmt.Sprintf("mysql://%s:%s@tcp(%s:%s)/%s", user, password, host, port, db)
-}
-
-func (m *MySQL) Display() {
-	fmt.Println("User: ", m.MYSQL_USER)
-	fmt.Println("Password: ", m.MYSQL_PASSWORD)
-	fmt.Println("Root Password: ", m.MYSQL_ROOT_PASSWORD)
-	fmt.Println("Database: ", m.MYSQL_DATABASE)
-	fmt.Println("Port: ", m.Opts.HostPort)
-	fmt.Println("DSN: ", m.DSN)
+func (m *MySQL) Dsn() string {
+	return fmt.Sprintf("mysql://%s:%s@tcp(%s:%s)/%s", m.MYSQL_USER, m.MYSQL_PASSWORD, m.GetHostPort(), m.ContainerPort, m.MYSQL_DATABASE)
 }

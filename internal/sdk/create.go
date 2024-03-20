@@ -12,6 +12,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/raphaelmb/quick-db/internal/database"
+	"github.com/raphaelmb/quick-db/internal/dto"
 )
 
 func cli() (*client.Client, error) {
@@ -80,19 +81,19 @@ func start(ctx context.Context, cli *client.Client, resp container.CreateRespons
 	return nil
 }
 
-func Setup(db database.DB) error {
+func Setup(db database.DB) (dto.ContainerCreate, error) {
 	ctx := context.Background()
 	fmt.Println("Starting client...")
 	cli, err := cli()
 	if err != nil {
-		return err
+		return dto.ContainerCreate{}, err
 	}
 	defer cli.Close()
 
 	fmt.Println("Pulling image...")
 	reader, err := pull(ctx, cli, db.GetImage())
 	if err != nil {
-		return err
+		return dto.ContainerCreate{}, nil
 	}
 	defer reader.Close()
 
@@ -101,16 +102,23 @@ func Setup(db database.DB) error {
 	fmt.Println("Creating container...")
 	resp, err := create(ctx, cli, db.GetImage(), db.EnvVars(), db.GetContainerPort(), db.GetHostPort(), db.GetContainerName(), db.GetCreateVolume(), db.GetDataPath())
 	if err != nil {
-		return err
+		return dto.ContainerCreate{}, err
 	}
 
 	fmt.Println("Starting container...")
 	if err := start(ctx, cli, resp); err != nil {
-		return err
+		return dto.ContainerCreate{}, err
 	}
 
 	fmt.Println("Done.")
-	db.Display()
 
-	return nil
+	return dto.ContainerCreate{
+		ID:       resp.ID,
+		Name:     db.GetContainerName(),
+		Port:     db.GetHostPort(),
+		User:     db.GetUser(),
+		Password: db.GetPassword(),
+		Database: db.GetDB(),
+		DSN:      db.Dsn(),
+	}, nil
 }

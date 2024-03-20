@@ -9,7 +9,6 @@ type PostgreSQL struct {
 	POSTGRES_DB       string
 	DataPath          string
 	ContainerPort     string
-	DSN               string
 	Opts              Options
 }
 
@@ -26,9 +25,20 @@ func NewPostgreSQL(image, user, password, db, port, name string, volume bool) *P
 	pg.Opts.Name = defaultIfEmpty(name, "")
 	pg.Opts.CreateVolume = volume
 	pg.ContainerPort = "5432"
-	pg.DSN = pg.Dsn(pg.POSTGRES_USER, pg.POSTGRES_PASSWORD, "localhost", pg.Opts.HostPort, pg.POSTGRES_DB)
 
 	return pg
+}
+
+func (p *PostgreSQL) GetUser() string {
+	return p.POSTGRES_USER
+}
+
+func (p *PostgreSQL) GetPassword() string {
+	return p.POSTGRES_PASSWORD
+}
+
+func (p *PostgreSQL) GetDB() string {
+	return p.POSTGRES_DB
 }
 
 func (p *PostgreSQL) GetImage() string {
@@ -59,14 +69,6 @@ func (p *PostgreSQL) EnvVars() []string {
 	return []string{"POSTGRES_USER=" + p.POSTGRES_DB, "POSTGRES_PASSWORD=" + p.POSTGRES_PASSWORD, "POSTGRES_DB=" + p.POSTGRES_DB}
 }
 
-func (p *PostgreSQL) Dsn(user, password, host, port, db string) string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=false", user, password, host, port, db)
-}
-
-func (p *PostgreSQL) Display() {
-	fmt.Println("User: ", p.POSTGRES_USER)
-	fmt.Println("Password: ", p.POSTGRES_PASSWORD)
-	fmt.Println("Database: ", p.POSTGRES_DB)
-	fmt.Println("Port: ", p.Opts.HostPort)
-	fmt.Println("DSN: ", p.DSN)
+func (p *PostgreSQL) Dsn() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=false", p.POSTGRES_USER, p.POSTGRES_PASSWORD, p.GetHostPort(), p.ContainerPort, p.POSTGRES_DB)
 }

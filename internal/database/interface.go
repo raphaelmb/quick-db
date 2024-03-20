@@ -8,6 +8,8 @@ type DB interface {
 	GetCreateVolume() bool
 	GetHostPort() string
 	EnvVars() []string
-	Dsn(user, password, host, port, db string) string
-	Display()
+	Dsn() string
+	GetUser() string
+	GetPassword() string
+	GetDB() string
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,7 +20,7 @@ func main() {
 	mux.HandleFunc("GET /", home)
 	mux.HandleFunc("POST /create", create)
 	mux.HandleFunc("GET /list", list)
-	mux.HandleFunc("POST /remove", remove)
+	mux.HandleFunc("DELETE /remove/{id}", remove)
 
 	fmt.Println("Open on browser http://localhost:9000")
 	if err := http.ListenAndServe(":9000", mux); err != nil {
@@ -27,30 +28,64 @@ func main() {
 	}
 }
 
+type Input struct {
+	Dbs      string `json:"dbs"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Db       string `json:"db"`
+	Port     string `json:"port"`
+	Name     string `json:"name"`
+}
+
 func create(w http.ResponseWriter, r *http.Request) {
-	dbsys := r.FormValue("dbs")
-	user := r.FormValue("user")
-	password := r.FormValue("password")
-	port := r.FormValue("port")
-	db := r.FormValue("db")
-	name := r.FormValue("name")
-
-	d := createDB(dbsys, user, password, port, db, name)
-
-	err := sdk.Setup(d)
+	var input Input
+	err := json.NewDecoder(r.Body).Decode(&input)
+	fmt.Printf("%+v", input)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	d := createDB(input.Dbs, input.User, input.Password, input.Db, input.Port, input.Name)
+
+	c, err := sdk.Setup(d)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	m, err := json.Marshal(c)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(m)
 }
 
 func list(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	c, err := sdk.List()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	m, err := json.Marshal(c)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(m)
 }
 
 func remove(w http.ResponseWriter, r *http.Request) {
-	id := r.FormValue("id")
+	id := r.PathValue("id")
 
 	err := sdk.Remove(id)
 	if err != nil {
