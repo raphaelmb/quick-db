@@ -40,7 +40,6 @@ type Input struct {
 func create(w http.ResponseWriter, r *http.Request) {
 	var input Input
 	err := json.NewDecoder(r.Body).Decode(&input)
-	fmt.Printf("%+v", input)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,6 +62,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	w.Write(m)
 }
 
@@ -81,6 +82,8 @@ func list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(m)
 }
 

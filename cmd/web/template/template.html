@@ -22,11 +22,13 @@
             <button id="create" type="submit">create</button>
         </form>
     </div>
+    <div id="created"></div>
     <div>
         <form>
             <button id="list" type="button">list</button>
         </form>
     </div>
+    <div id="listed"></div>
     <div>
         <form action="/remove" method="post">
             <input type="text" id="id" placeholder="id">
@@ -40,14 +42,19 @@
     const createBtn = document.getElementById("create")
     const listBtn = document.getElementById("list")
     const removeBtn = document.getElementById("remove")
+    const created = document.getElementById("created")
+    const listed = document.getElementById("listed")
 
     createBtn.addEventListener("click", async (e) => {
         e.preventDefault()
         const form = document.forms["form"]
         const menu = document.getElementById("menu")
-        console.log(menu.value)
-        await fetch(`${url}/create`, {
+        let res = await fetch(`${url}/create`, {
             method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify({
                 dbs: menu.value,
                 user: form.user.value,
@@ -57,6 +64,8 @@
                 name: form.name.value
             })
         })
+        res = await res.json()
+        created.innerHTML += JSON.stringify(res)
     })
 
     listBtn.addEventListener("click", async (e) => {
@@ -65,7 +74,7 @@
             method: "GET"
         })
         res = await res.json()
-        console.log(res)
+        listed.innerHTML += JSON.stringify(res)
     })
 
     removeBtn.addEventListener("click", async (e) => {

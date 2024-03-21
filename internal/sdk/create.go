@@ -83,14 +83,12 @@ func start(ctx context.Context, cli *client.Client, resp container.CreateRespons
 
 func Setup(db database.DB) (dto.ContainerCreate, error) {
 	ctx := context.Background()
-	fmt.Println("Starting client...")
 	cli, err := cli()
 	if err != nil {
 		return dto.ContainerCreate{}, err
 	}
 	defer cli.Close()
 
-	fmt.Println("Pulling image...")
 	reader, err := pull(ctx, cli, db.GetImage())
 	if err != nil {
 		return dto.ContainerCreate{}, nil
@@ -99,18 +97,14 @@ func Setup(db database.DB) (dto.ContainerCreate, error) {
 
 	io.Copy(io.Discard, reader)
 
-	fmt.Println("Creating container...")
 	resp, err := create(ctx, cli, db.GetImage(), db.EnvVars(), db.GetContainerPort(), db.GetHostPort(), db.GetContainerName(), db.GetCreateVolume(), db.GetDataPath())
 	if err != nil {
 		return dto.ContainerCreate{}, err
 	}
 
-	fmt.Println("Starting container...")
 	if err := start(ctx, cli, resp); err != nil {
 		return dto.ContainerCreate{}, err
 	}
-
-	fmt.Println("Done.")
 
 	return dto.ContainerCreate{
 		ID:       resp.ID,

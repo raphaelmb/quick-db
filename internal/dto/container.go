@@ -1,8 +1,6 @@
 package dto
 
 import (
-	"strconv"
-
 	"github.com/docker/docker/api/types"
 )
 
@@ -10,7 +8,7 @@ type ContainerList struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Image string `json:"image"`
-	Port  string `json:"port"`
+	Port  uint16 `json:"port"`
 }
 
 func ToContainerListDTO(container types.Container) ContainerList {
@@ -18,7 +16,7 @@ func ToContainerListDTO(container types.Container) ContainerList {
 		ID:    container.ID[:7],
 		Name:  container.Names[0],
 		Image: container.Image,
-		Port:  strconv.Itoa(int(container.Ports[0].PublicPort)),
+		Port:  container.Ports[0].PublicPort,
 	}
 }
 
