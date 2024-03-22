@@ -106,13 +106,26 @@ func Setup(db database.DB) (dto.ContainerCreate, error) {
 		return dto.ContainerCreate{}, err
 	}
 
+	name, err := getContainerName(ctx, cli)
+	if err != nil {
+		return dto.ContainerCreate{}, err
+	}
+
 	return dto.ContainerCreate{
 		ID:       resp.ID,
-		Name:     db.GetContainerName(),
+		Name:     name,
 		Port:     db.GetHostPort(),
 		User:     db.GetUser(),
 		Password: db.GetPassword(),
 		Database: db.GetDB(),
 		DSN:      db.Dsn(),
 	}, nil
+}
+
+func getContainerName(ctx context.Context, cli *client.Client) (string, error) {
+	container, err := cli.ContainerList(ctx, container.ListOptions{Latest: true})
+	if err != nil {
+		return "", err
+	}
+	return container[0].Names[0], nil
 }

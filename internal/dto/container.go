@@ -29,3 +29,10 @@ type ContainerCreate struct {
 	Database string `json:"database"`
 	DSN      string `json:"dsn"`
 }
+
+// func ToContainerCreateDTO(id, name, port, user, password, database, dsn string) ContainerCreate {
+// 	return ContainerCreate{
+// 		ID: id,
+// 		Name: ,
+// 	}
+// }

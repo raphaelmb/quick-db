@@ -15,14 +15,15 @@
                 <option value="postgres">PostgreSQL</option>
                 <option value="mongodb">MongoDB</option>
             </select>
-            <input type="text" name="user" placeholder="user">
-            <input type="text" name="password" placeholder="password">
-            <input type="text" name="db" placeholder="default db">
-            <input type="text" name="port" placeholder="port">
-            <input type="text" name="name" placeholder="name">
+            <input id="user" type="text" name="user" placeholder="user">
+            <input id="password"type="text" name="password" placeholder="password">
+            <input id="db"type="text" name="db" placeholder="default db">
+            <input id="port"type="text" name="port" placeholder="port">
+            <input id="name"type="text" name="name" placeholder="name">
+            <span><em>*default values will be used if no input is set </em></span>
         </form>
     </div>
-    <div id="created"></div>
+    <div id="created" style="border: 1px solid black;"></div>
     <div>
         <form>
             <button id="remove" type="submit">remove</button>
@@ -34,7 +35,7 @@
             <button id="list" type="button">list</button>
         </form>
     </div>
-    <div id="listed"></div>
+    <div id="listed" style="border: 1px solid black;"></div>
     </div>
 </body>
 </html>
@@ -46,6 +47,11 @@
     const created = document.getElementById("created")
     const listed = document.getElementById("listed")
     const removed = document.getElementById("removed")
+    const user = document.getElementById("user")
+    const password = document.getElementById("password")
+    const db = document.getElementById("db")
+    const port = document.getElementById("port")
+    const name = document.getElementById("name")
 
     createBtn.addEventListener("click", async (e) => {
         created.innerHTML = ""
@@ -69,15 +75,20 @@
         })
         res = await res.json()
         created.innerHTML += `
-            <span>ID: ${res.id}</span>
-            <span>Name: ${res.name}</span>
-            <span>Port: ${res.port}</span>
-            <span>User: ${res.user}</span>
-            <span>Password: ${res.password}</span>
-            <span>Database: ${res.database}</span>
-            <span>DSN: ${res.dsn}</span>
+            <span><strong>ID:</strong> ${res.id}</span>
+            <span><strong>Name:</strong> ${res.name}</span>
+            <span><strong>Port:</strong> ${res.port}</span>
+            <span><strong>User:</strong> ${res.user}</span>
+            <span><strong>Password:</strong> ${res.password}</span>
+            <span><strong>Database:</strong> ${res.database}</span>
+            <span><strong>DSN:</strong> ${res.dsn}</span>
             <br>
         `
+        form.user.value = ""
+        form.password.value = ""
+        form.db.value = ""
+        form.port.value = ""
+        form.name.value = ""
     })
 
     listBtn.addEventListener("click", async (e) => {
@@ -95,10 +106,10 @@
         }
         for (const container of res) {
             let h = `
-                <span>ID: ${container.id}</span>
-                <span>Name: ${container.name}</span>
-                <span>Image: ${container.image}</span>
-                <span>Port: ${container.port}</span>
+                <span><strong>ID:</strong> ${container.id}</span>
+                <span><strong>Name:</strong> ${container.name}</span>
+                <span><strong>Image:</strong> ${container.image}</span>
+                <span><strong>Port:</strong> ${container.port}</span>
                 <br>
             `
             listed.innerHTML += h
@@ -119,5 +130,6 @@
                 removed.innerHTML = ""
             }, 2000)
         }
+        id.value = ""
     })
 </script>
