@@ -9,6 +9,7 @@
     <h1>quickdb</h1> 
     <div>
         <form id="form">
+            <button id="create" type="submit">create</button>
             <select id="menu">
                 <option value="mysql">MySQL</option>
                 <option value="postgres">PostgreSQL</option>
@@ -19,21 +20,21 @@
             <input type="text" name="db" placeholder="default db">
             <input type="text" name="port" placeholder="port">
             <input type="text" name="name" placeholder="name">
-            <button id="create" type="submit">create</button>
         </form>
     </div>
     <div id="created"></div>
+    <div>
+        <form>
+            <button id="remove" type="submit">remove</button>
+            <input type="text" id="id" placeholder="id">
+        </form>
+    <div id="removed"></div>
     <div>
         <form>
             <button id="list" type="button">list</button>
         </form>
     </div>
     <div id="listed"></div>
-    <div>
-        <form action="/remove" method="post">
-            <input type="text" id="id" placeholder="id">
-            <button id="remove" type="submit">remove</button>
-        </form>
     </div>
 </body>
 </html>
@@ -44,8 +45,10 @@
     const removeBtn = document.getElementById("remove")
     const created = document.getElementById("created")
     const listed = document.getElementById("listed")
+    const removed = document.getElementById("removed")
 
     createBtn.addEventListener("click", async (e) => {
+        created.innerHTML = ""
         e.preventDefault()
         const form = document.forms["form"]
         const menu = document.getElementById("menu")
@@ -65,24 +68,56 @@
             })
         })
         res = await res.json()
-        created.innerHTML += JSON.stringify(res)
+        created.innerHTML += `
+            <span>ID: ${res.id}</span>
+            <span>Name: ${res.name}</span>
+            <span>Port: ${res.port}</span>
+            <span>User: ${res.user}</span>
+            <span>Password: ${res.password}</span>
+            <span>Database: ${res.database}</span>
+            <span>DSN: ${res.dsn}</span>
+            <br>
+        `
     })
 
     listBtn.addEventListener("click", async (e) => {
+        listed.innerHTML = ""
         e.preventDefault()
         let res = await fetch(`${url}/list`, {
             method: "GET"
         })
         res = await res.json()
-        listed.innerHTML += JSON.stringify(res)
+        if (!res) {
+            listed.innerHTML += "No containers found"
+            setTimeout(() => {
+                listed.innerHTML = ""
+            }, 2000)
+        }
+        for (const container of res) {
+            let h = `
+                <span>ID: ${container.id}</span>
+                <span>Name: ${container.name}</span>
+                <span>Image: ${container.image}</span>
+                <span>Port: ${container.port}</span>
+                <br>
+            `
+            listed.innerHTML += h
+        }
     })
 
     removeBtn.addEventListener("click", async (e) => {
+        removed.innerHTML = ""
         e.preventDefault()
         const val = document.getElementById("id").value
         console.log(val)
-        await fetch(`${url}/remove/${val}`, {
+        let resp = await fetch(`${url}/remove/${val}`, {
             method: "DELETE",
         })
+        if (resp.status === 400) {
+            removed.innerHTML += "No container with given ID"
+            setTimeout(() => {
+                removed.innerHTML = ""
+            }, 2000)
+        }
     })
 </script>

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"text/template"
 
 	"github.com/raphaelmb/quick-db/internal/database"
@@ -91,6 +92,12 @@ func remove(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	err := sdk.Remove(id)
+	if err != nil && strings.Contains(err.Error(), "No such container") {
+		log.Println(err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
