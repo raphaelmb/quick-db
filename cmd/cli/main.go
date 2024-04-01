@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/raphaelmb/quick-db/internal/database"
@@ -9,37 +11,74 @@ import (
 )
 
 func main() {
-	arg1 := os.Args[1]
-	arg2 := os.Args[2]
+	var (
+		postgres bool
+		mysql    bool
+		mongodb  bool
+		list     bool
+		remove   string
 
-	switch arg1 {
-	case "create":
-		fmt.Println("Creating a database via Docker")
-	case "list":
-		sdk.List()
-		return
-	case "remove":
-		// sdk.Remove()
-	default:
-		fmt.Println("Error: Expected command 'create', 'list' or 'remove'")
-		return
-	}
+		user     string
+		password string
+		db       string
+		port     string
+		name     string
+	)
 
-	switch arg2 {
-	case "postgres":
-		fmt.Println("PostgreSQL chosen")
-		pg := database.NewPostgreSQL("postgres", "", "", "", "", "", false)
-		sdk.Setup(pg)
-	case "mysql":
-		fmt.Println("MySQL chosen")
-		mysql := database.NewMySQL("mysql", "", "", "", "", "", false)
-		sdk.Setup(mysql)
-	case "mongo":
-		fmt.Println("MongoDB chosen")
-		mongo := database.NewMongoDB("mongo", "", "", "", "", "", false)
-		sdk.Setup(mongo)
-	default:
-		fmt.Println("Error: expected database 'postgres', 'mysql' or 'mongo'")
+	flag.BoolVar(&postgres, "postgres", false, "create postgres database")
+	flag.BoolVar(&mysql, "mysql", false, "create mysql database")
+	flag.BoolVar(&mongodb, "mongodb", false, "create mongodb")
+
+	flag.BoolVar(&list, "list", false, "list containers")
+	flag.StringVar(&remove, "remove", "", "remove container")
+
+	flag.StringVar(&user, "user", "", "database user")
+	flag.StringVar(&password, "password", "", "database password")
+	flag.StringVar(&db, "db", "", "default database")
+	flag.StringVar(&port, "port", "", "host port")
+	flag.StringVar(&name, "name", "", "container name")
+
+	flag.Parse()
+
+	switch {
+	case postgres:
+		pg := database.NewPostgreSQL("postgres", user, password, db, port, name, false)
+		container, err := sdk.Setup(pg)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(container)
+	case mysql:
+		mysql := database.NewMySQL("mysql", user, password, db, port, name, false)
+		container, err := sdk.Setup(mysql)
+		if err != nil {
+			log.Fatal(err)
+			fmt.Println(err)
+		}
+		fmt.Println(container)
+	case mongodb:
+		mongo := database.NewMongoDB("mongo", user, password, db, port, name, false)
+		container, err := sdk.Setup(mongo)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(container)
+	case list:
+		list, err := sdk.List()
+		if len(list) == 0 {
+			fmt.Println("No containers found")
+			os.Exit(0)
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(list)
 		return
+	case remove != "":
+		err := sdk.Remove(remove)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Container %s removed\n", remove)
 	}
 }

@@ -21,7 +21,7 @@ func NewPostgreSQL(image, user, password, db, port, name string, volume bool) *P
 		DataPath:          "/var/lib/postgresql/data",
 	}
 
-	pg.Opts.HostPort = defaultIfEmpty("5432", port)
+	pg.Opts.HostPort = defaultIfEmpty(port, "5432")
 	pg.Opts.Name = defaultIfEmpty(name, "")
 	pg.Opts.CreateVolume = volume
 	pg.ContainerPort = "5432"

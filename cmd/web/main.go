@@ -129,7 +129,7 @@ func createDB(dbsys, user, password, port, db, name string) database.DB {
 	case "mysql":
 		return database.NewMySQL("mysql", user, password, port, db, name, false)
 	case "mongodb":
-		return database.NewMongoDB("mongodb", user, password, port, db, name, false)
+		return database.NewMongoDB("mongo", user, password, port, db, name, false)
 	}
 	return nil
 }
