@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/adhocore/chin"
 	"github.com/raphaelmb/quick-db/internal/database"
+	"github.com/raphaelmb/quick-db/internal/dto"
 	"github.com/raphaelmb/quick-db/internal/sdk"
 )
 
@@ -40,30 +42,39 @@ func main() {
 
 	flag.Parse()
 
+	s := chin.New()
+
 	switch {
 	case postgres:
+		go s.Start()
 		pg := database.NewPostgreSQL("postgres", user, password, db, port, name, false)
 		container, err := sdk.Setup(pg)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(container)
+		s.Stop()
+		PrintContainer(container)
 	case mysql:
+		go s.Start()
 		mysql := database.NewMySQL("mysql", user, password, db, port, name, false)
 		container, err := sdk.Setup(mysql)
 		if err != nil {
 			log.Fatal(err)
 			fmt.Println(err)
 		}
-		fmt.Println(container)
+		s.Stop()
+		PrintContainer(container)
 	case mongodb:
+		go s.Start()
 		mongo := database.NewMongoDB("mongo", user, password, db, port, name, false)
 		container, err := sdk.Setup(mongo)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(container)
+		s.Stop()
+		PrintContainer(container)
 	case list:
+		go s.Start()
 		list, err := sdk.List()
 		if len(list) == 0 {
 			fmt.Println("No containers found")
@@ -72,13 +83,26 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(list)
-		return
+		s.Stop()
+		ListContainers(list)
 	case remove != "":
+		go s.Start()
 		err := sdk.Remove(remove)
 		if err != nil {
 			log.Fatal(err)
 		}
+		s.Stop()
 		fmt.Printf("Container %s removed\n", remove)
+	}
+}
+
+func PrintContainer(container dto.ContainerCreate) {
+	fmt.Printf("ID: %s\nName: %s\nPort: %s\nUser: %s\nPassword: %s\nDatabase: %s\nDSN: %s\n",
+		container.ID, container.Name, container.Port, container.User, container.Password, container.Database, container.DSN)
+}
+
+func ListContainers(containers []dto.ContainerList) {
+	for _, v := range containers {
+		fmt.Printf("ID: %s\nName: %s\nImage: %s\nPort: %d\n\n", v.ID, v.Name, v.Image, v.Port)
 	}
 }

@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1>quickdb</h1> 
+        <span><em>*default values will be used if no input is set on create</em></span>
     <div>
         <form id="form">
             <button id="create" type="submit">create</button>
@@ -20,10 +21,9 @@
             <input id="db"type="text" name="db" placeholder="default db">
             <input id="port"type="text" name="port" placeholder="port">
             <input id="name"type="text" name="name" placeholder="name">
-            <span><em>*default values will be used if no input is set </em></span>
         </form>
     </div>
-    <div id="created" style="border: 1px solid black;"></div>
+    <div id="created"></div>
     <div>
         <form>
             <button id="remove" type="submit">remove</button>
@@ -35,8 +35,11 @@
             <button id="list" type="button">list</button>
         </form>
     </div>
-    <div id="listed" style="border: 1px solid black;"></div>
+    <div id="listed" ></div>
     </div>
+    <footer>
+        <a href="http://github.com/raphaelmb/quick-db">quickdb on github</a>
+    </footer>
 </body>
 </html>
 <script>
@@ -75,6 +78,7 @@
         })
         res = await res.json()
         created.innerHTML += `
+            <div id="createdContainer">
             <span><strong>ID:</strong> ${res.id}</span>
             <span><strong>Name:</strong> ${res.name}</span>
             <span><strong>Port:</strong> ${res.port}</span>
@@ -82,7 +86,7 @@
             <span><strong>Password:</strong> ${res.password}</span>
             <span><strong>Database:</strong> ${res.database}</span>
             <span><strong>DSN:</strong> ${res.dsn}</span>
-            <br>
+            </div>
         `
         form.user.value = ""
         form.password.value = ""
@@ -106,11 +110,12 @@
         }
         for (const container of res) {
             let h = `
+                <div id="listedContainer">
                 <span><strong>ID:</strong> ${container.id}</span>
                 <span><strong>Name:</strong> ${container.name}</span>
                 <span><strong>Image:</strong> ${container.image}</span>
                 <span><strong>Port:</strong> ${container.port}</span>
-                <br>
+                </div>
             `
             listed.innerHTML += h
         }
@@ -133,3 +138,107 @@
         id.value = ""
     })
 </script>
+<style>
+    h1 {
+        text-align: center;
+    }
+
+    div {
+        margin: 1em;
+    }
+
+    #created:empty {
+        display: none;
+    }
+    #created {
+        margin: 10rm;
+        border: 1px solid black
+    }
+
+    #createdContainer {}
+
+    #listed:empty {
+        display: none;
+    }
+    #listed {
+        border: 1px solid black;
+    }
+
+    #listedContainer {}
+
+    button {
+        background-color: #222;
+        border-radius: 4px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.5;
+        margin: 0;
+        max-width: none;
+        min-height: 44px;
+        min-width: 10px;
+        outline: none;
+        overflow: hidden;
+        padding: 9px 20px 8px;
+        position: relative;
+        text-align: center;
+        text-transform: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+    button:hover,button:focus {
+        opacity: .75;
+    }
+
+    select {
+        background-color: #fff;
+        border-radius: 4px;
+        box-sizing: border-box;
+        color: #222;
+        display: inline-block;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.5;
+        margin: 0;
+        max-width: none;
+        min-height: 44px;
+        min-width: 10px;
+        overflow: hidden;
+        padding: 9px 20px 8px;
+        position: relative;
+        text-transform: none;
+    }
+
+    input {
+        background-color: #fff;
+        border-radius: 4px;
+        box-sizing: border-box;
+        color: #222;
+        display: inline-block;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.5;
+        margin: 0;
+        max-width: none;
+        min-height: 44px;
+        min-width: 10px;
+        overflow: hidden;
+        padding: 9px 20px 8px;
+        position: relative;
+        text-transform: none;
+    }
+
+    footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        color: white;
+        text-align: center;
+    }
+</style>

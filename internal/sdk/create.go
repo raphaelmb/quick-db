@@ -111,15 +111,7 @@ func Setup(db database.DB) (dto.ContainerCreate, error) {
 		return dto.ContainerCreate{}, err
 	}
 
-	return dto.ContainerCreate{
-		ID:       resp.ID,
-		Name:     name,
-		Port:     db.GetHostPort(),
-		User:     db.GetUser(),
-		Password: db.GetPassword(),
-		Database: db.GetDB(),
-		DSN:      db.Dsn(),
-	}, nil
+	return dto.ToContainerCreateDTO(resp.ID, name, db.GetHostPort(), db.GetUser(), db.GetPassword(), db.GetDB(), db.Dsn()), nil
 }
 
 func getContainerName(ctx context.Context, cli *client.Client) (string, error) {
