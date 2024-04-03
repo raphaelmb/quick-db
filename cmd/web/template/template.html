@@ -29,16 +29,16 @@
             <button id="remove" type="submit">remove</button>
             <input type="text" id="id" placeholder="id">
         </form>
+    </div>
     <div id="removed"></div>
     <div>
         <form>
             <button id="list" type="button">list</button>
         </form>
     </div>
-    <div id="listed" ></div>
-    </div>
+    <div id="listed"></div>
     <footer>
-        <a href="http://github.com/raphaelmb/quick-db">quickdb on github</a>
+        <a target="_blank" href="http://github.com/raphaelmb/quick-db">quickdb on github</a>
     </footer>
 </body>
 </html>
@@ -143,10 +143,6 @@
         text-align: center;
     }
 
-    div {
-        margin: 1em;
-    }
-
     #created:empty {
         display: none;
     }
@@ -179,8 +175,7 @@
         line-height: 1.5;
         margin: 0;
         max-width: none;
-        min-height: 44px;
-        min-width: 10px;
+        width: 105px;
         outline: none;
         overflow: hidden;
         padding: 9px 20px 8px;
@@ -240,5 +235,11 @@
         width: 100%;
         color: white;
         text-align: center;
+    }
+
+    a {
+        color: #222;
+        font-weight: 700;
+        text-decoration: none;
     }
 </style>
