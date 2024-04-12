@@ -32,7 +32,7 @@ type ContainerCreate struct {
 
 func ToContainerCreateDTO(id, name, port, user, password, database, dsn string) ContainerCreate {
 	return ContainerCreate{
-		ID:       id,
+		ID:       id[:7],
 		Name:     name,
 		User:     user,
 		Password: password,

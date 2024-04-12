@@ -42,7 +42,6 @@ func create(w http.ResponseWriter, r *http.Request) {
 	var input Input
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
-		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -51,14 +50,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 
 	c, err := sdk.Setup(d)
 	if err != nil {
-		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	m, err := json.Marshal(c)
 	if err != nil {
-		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -71,14 +68,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 func list(w http.ResponseWriter, r *http.Request) {
 	c, err := sdk.List()
 	if err != nil {
-		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	m, err := json.Marshal(c)
 	if err != nil {
-		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -93,13 +88,11 @@ func remove(w http.ResponseWriter, r *http.Request) {
 
 	err := sdk.Remove(id)
 	if err != nil && strings.Contains(err.Error(), "No such container") {
-		log.Println(err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	if err != nil {
-		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

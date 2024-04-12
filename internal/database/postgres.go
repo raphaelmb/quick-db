@@ -70,5 +70,5 @@ func (p *PostgreSQL) EnvVars() []string {
 }
 
 func (p *PostgreSQL) Dsn() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=false", p.POSTGRES_USER, p.POSTGRES_PASSWORD, p.GetHostPort(), p.ContainerPort, p.POSTGRES_DB)
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=false", p.POSTGRES_USER, p.POSTGRES_PASSWORD, "localhost", p.GetHostPort(), p.POSTGRES_DB)
 }

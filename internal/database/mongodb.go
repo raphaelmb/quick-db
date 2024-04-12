@@ -70,5 +70,5 @@ func (m *MongoDB) EnvVars() []string {
 }
 
 func (m *MongoDB) Dsn() string {
-	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", m.MONGO_INITDB_ROOT_USERNAME, m.MONGO_INITDB_ROOT_PASSWORD, m.GetHostPort(), m.ContainerPort, m.MONGO_INITDB_DATABASE)
+	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", m.MONGO_INITDB_ROOT_USERNAME, m.MONGO_INITDB_ROOT_PASSWORD, "localhost", m.GetHostPort(), m.MONGO_INITDB_DATABASE)
 }

@@ -72,5 +72,5 @@ func (m *MySQL) EnvVars() []string {
 }
 
 func (m *MySQL) Dsn() string {
-	return fmt.Sprintf("mysql://%s:%s@tcp(%s:%s)/%s", m.MYSQL_USER, m.MYSQL_PASSWORD, m.GetHostPort(), m.ContainerPort, m.MYSQL_DATABASE)
+	return fmt.Sprintf("mysql://%s:%s@tcp(%s:%s)/%s", m.MYSQL_USER, m.MYSQL_PASSWORD, "localhost", m.GetHostPort(), m.MYSQL_DATABASE)
 }
