@@ -72,23 +72,6 @@
         const form = document.forms["form"]
         const menu = document.getElementById("menu")
         showSpinner()
-        let getContainers = await fetch(`${url}/list`, {
-            method: "GET"
-        })
-        getContainers = await getContainers.json()
-        if (getContainers?.length !== 0) {
-            for (let container in getContainers) {
-                if (container.port == menu["port"]) {
-                    created.innerHTML = "Port already in use"
-                        setTimeout(() => {
-                            created.innerHTML = ""
-                    }, 2000)
-                    hideSpinner()
-                    return
-                }
-            }
-        }
-        
         let res = await fetch(`${url}/create`, {
             method: "POST",
             headers: {

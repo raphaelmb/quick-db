@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -82,6 +83,11 @@ func start(ctx context.Context, cli *client.Client, resp container.CreateRespons
 }
 
 func Setup(db database.DB) (dto.ContainerCreate, error) {
+	c, err := net.Listen("tcp", "localhost:"+db.GetHostPort())
+	if err != nil {
+		return dto.ContainerCreate{}, err
+	}
+	c.Close()
 	ctx := context.Background()
 	cli, err := cli()
 	if err != nil {
