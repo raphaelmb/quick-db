@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>quick-db</title>
+    <title>quickdb</title>
 </head>
 <body>
     <h1>quickdb</h1> 
-    <span><em>*default values will be used if the input is empty on create</em></span>
+        <span><em>*default values will be used if the input is empty on create</em></span>
     <div>
         <form id="form">
             <button id="create" type="submit">create</button>
@@ -23,7 +23,20 @@
             <input id="name"type="text" name="name" placeholder="name">
         </form>
     </div>
+    <div id="created"></div>
     <div id="loading" class="loading"></div>
+    <div>
+        <form>
+            <button id="remove" type="submit">remove</button>
+            <input type="text" id="id" placeholder="id">
+        </form>
+    </div>
+    <div id="removed"></div>
+    <div>
+        <form>
+            <button id="list" type="button">list</button>
+        </form>
+    </div>
     <div id="listed"></div>
     <footer>
         <a target="_blank" href="http://github.com/raphaelmb/quick-db">quickdb on github</a>
@@ -33,10 +46,17 @@
 <script>
     const url = "http://localhost:9000"
     const createBtn = document.getElementById("create")
+    const listBtn = document.getElementById("list")
+    const removeBtn = document.getElementById("remove")
+    const created = document.getElementById("created")
     const listed = document.getElementById("listed")
+    const removed = document.getElementById("removed")
+    const user = document.getElementById("user")
+    const password = document.getElementById("password")
+    const db = document.getElementById("db")
+    const port = document.getElementById("port")
+    const name = document.getElementById("name")
     const loadingDiv = document.getElementById('loading');
-
-    loadContainers()
 
     function showSpinner() {
         loadingDiv.style.visibility = 'visible';
@@ -47,11 +67,12 @@
     }
 
     createBtn.addEventListener("click", async (e) => {
+        created.innerHTML = ""
         e.preventDefault()
         const form = document.forms["form"]
         const menu = document.getElementById("menu")
         showSpinner()
-        await fetch(`${url}/create`, {
+        let res = await fetch(`${url}/create`, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -66,26 +87,21 @@
                 name: form.name.value
             })
         })
-        hideSpinner()
-
-        let res = await fetch(`${url}/list`, {
-            method: "GET"
-        })
-        res = await res.json()
-        listed.innerHTML = ""
-        for (const container of res) {
-            let h = `
-                <div id="listedContainer">
-                <span><strong>ID:</strong> ${container.id}</span>
-                <span><strong>Name:</strong> ${container.name}</span>
-                <span><strong>Image:</strong> ${container.image}</span>
-                <span><strong>Port:</strong> ${container.port}</span>
-                <button></button>
-                </div>
-            `
-            listed.innerHTML += h
+        if (res.status == 500) {
         }
-
+        res = await res.json()
+        hideSpinner()
+        created.innerHTML += `
+            <div id="createdContainer">
+            <span><strong>ID:</strong> ${res.id}</span>
+            <span><strong>Name:</strong> ${res.name}</span>
+            <span><strong>Port:</strong> ${res.port}</span>
+            <span><strong>User:</strong> ${res.user}</span>
+            <span><strong>Password:</strong> ${res.password}</span>
+            <span><strong>Database:</strong> ${res.database}</span>
+            <span><strong>DSN:</strong> ${res.dsn}</span>
+            </div>
+        `
         form.user.value = ""
         form.password.value = ""
         form.db.value = ""
@@ -93,12 +109,20 @@
         form.name.value = ""
     })
 
-    async function loadContainers() {
+    listBtn.addEventListener("click", async (e) => {
+        listed.innerHTML = ""
+        e.preventDefault()
         let res = await fetch(`${url}/list`, {
             method: "GET"
         })
         res = await res.json()
-        listed.innerHTML = ""
+        if (!res) {
+            listed.innerHTML += "No containers found"
+            setTimeout(() => {
+                listed.innerHTML = ""
+            }, 2000)
+            return
+        }
         for (const container of res) {
             let h = `
                 <div id="listedContainer">
@@ -106,12 +130,35 @@
                 <span><strong>Name:</strong> ${container.name}</span>
                 <span><strong>Image:</strong> ${container.image}</span>
                 <span><strong>Port:</strong> ${container.port}</span>
-                <button></button>
                 </div>
             `
             listed.innerHTML += h
         }
-    }
+    })
+
+    removeBtn.addEventListener("click", async (e) => {
+        removed.innerHTML = ""
+        e.preventDefault()
+        const val = document.getElementById("id").value
+        if (!val) {
+            removed.innerHTML += "A container id is required"
+            setTimeout(() => {
+                removed.innerHTML = ""
+            }, 2000)
+            return
+        }
+        let resp = await fetch(`${url}/remove/${val}`, {
+            method: "DELETE",
+        })
+        if (resp.status === 400) {
+            removed.innerHTML += "No container with given ID"
+            setTimeout(() => {
+                removed.innerHTML = ""
+            }, 2000)
+            return
+        }
+        id.value = ""
+    })
 </script>
 <style>
     h1 {
@@ -126,6 +173,8 @@
         border: 1px solid black
     }
 
+    #createdContainer {}
+
     #listed:empty {
         display: none;
     }
@@ -135,6 +184,10 @@
         color: #222;
         font-size: 16px;
         font-weight: 700;
+    }
+
+    #listedContainer {
+
     }
 
     button {
